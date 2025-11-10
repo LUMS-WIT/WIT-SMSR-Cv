@@ -10,9 +10,9 @@ from utils import  SREncDataset
 from utils import plot_sample, plot_predictions , plot_difference 
 
 # === Configs ===
-COARSE_DIR = "training/central_valley/test/9km"
-FINE_DIR = "training/central_valley/test/1km"
-MODEL_PATH = "checkpoints/central_valley/best_model_GeoTransformerSR_1km.pth"
+COARSE_DIR = "training/test/9km"
+FINE_DIR = "training/test/1km"
+MODEL_PATH = "checkpoints/best_model_GeoTransformerSR_1km.pth"
 BATCH_SIZE = 1
 SCALE_FACTOR = 9
 UPSAMPLE = False

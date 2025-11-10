@@ -13,9 +13,9 @@ import matplotlib.pyplot as plt
 
 
 # === Configs ===
-COARSE_DIR = "training/central_valley/SMAP-HB/test/9km"
-FINE_DIR = "training/central_valley/SMAP-HB/test/1km"
-MODEL_PATH = "checkpoints/central_valley/best_model.pth"
+COARSE_DIR = "training/SMAP-HB/test/9km"
+FINE_DIR = "training/SMAP-HB/test/1km"
+MODEL_PATH = "checkpoints/best_model.pth"
 BATCH_SIZE = 1
 SCALE_FACTOR = 9
 UPSAMPLE = False         # True for SRCNN or basleline test
@@ -79,7 +79,7 @@ def main(loader):
                 all_metrics[k].append(metrics[k])
 
     # === Aggregate ===
-    print("\nBaseline on Test Set:")
+    print("\nScores on Test Set:")
     for k in all_metrics:
         if k == "PearsonR":
             mean_val = mean_r(all_metrics[k])
@@ -172,4 +172,4 @@ if __name__ == "__main__":
     main(loader)
     print('\n')
     baseline()
-    logs_display()
+    # logs_display()

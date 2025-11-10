@@ -6,7 +6,7 @@ To run the models and scripts in this repository, ensure your system meets the f
 
 ### Prerequisites
 - Python 3.8 or higher
-- conda
+- conda 24 or higher
 - Training Dataset
 
 1. **Clone the Repository**
@@ -16,31 +16,99 @@ To run the models and scripts in this repository, ensure your system meets the f
 
 2. **Install Dependencies using conda**
    ```bash
-   conda env create -f requirements.yml
+   conda env create -f requirements.txt
    conda activate geo
 
 ## Usage
 
 The dataset would be made available on publishing of the study. You need to download the dataset to execute the training and test scripts.
 
+---
+
+
+
+### Folder Structure
+
+```plaintext
+
+training/
+
+├── train/
+
+│   ├── 1km/
+
+│   │   └── SMAP-HB_1km_daily_mean_YYYYMMDD_X.tif
+
+│   ├── 3km/
+
+│   │   └── SMAP-HB_3km_daily_mean_YYYYMMDD_X.tif
+
+│   └── 9km/
+
+│       └── SMAP-E_9km_daily_mean_YYYYMMDD_X.tif
+
+├── test/
+
+│   ├── 1km/
+
+│   │   └── SMAP-HB_1km_daily_mean_YYYYMMDD_X.tif
+
+│   ├── 3km/
+
+│   │   └── SMAP-HB_3km_daily_mean_YYYYMMDD_X.tif
+
+│   └── 9km/
+
+│       └── SMAP-E_9km_daily_mean_YYYYMMDD_X.tif
+
+└── SMAP-HB/
+
+    ├── train/
+
+    └── test/
+
+### Notes
+
+- **train/** and **test/** folders contain data for model training and evaluation, respectively.
+
+- **SMAP-HB:**
+
+  - Contains data for upper bound estimation experimentation.
+
+- **File naming convention:**  
+
+  `SMAP-{type}_{resolution}_daily_mean_{YYYYMMDD}_{index}.tif`  
+
+  - `{type}` → SMAP-HB or SMAP-E
+
+  - `{resolution}` → `1km`, `3km`, `9km` — spatial resolution of the dataset.  
+
+  - `{YYYYMMDD}` → date of observation  
+
+  - `{index}` → sub-RoI Id
+
+- **File format:** `.tif` files are **GeoTIFF** raster data containing daily soil moisture values.
+
 
 ### `Train`
 
   - Command:
     ```bash
-    python main.py
+    python train.py
     ```
 
 ### `Test`
 
   - Command:
-    ```python
+    ```bash
+    python test.py
     ```
 
 ### `Inference`
 
   - Command:
-    ```python
+    ```bash
+    python inference.py
     ```
 
 ## Results
@@ -63,7 +131,7 @@ The dataset would be made available on publishing of the study. You need to down
 
 ### Qualitative Assessments
 
-![Results](images\fig_2.png)
+![Results](images\fig_2.jpg)
 
 ## Citation
 If you use this project in your research, please cite:

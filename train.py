@@ -8,12 +8,12 @@ from transformer import Transformer, TransformerSkip, GeoTransformerSR
 import torch.nn.functional as F
 
 # === Config params ===
-COARSE_DIR = "training/central_valley/train/9km"        # "training/central_valley/SMAP-HB/train/9km"
-FINE_DIR = "training/central_valley/train/1km"
+COARSE_DIR = "training/train/9km"        # "training/central_valley/SMAP-HB/train/9km"
+FINE_DIR = "training/train/1km"
 UPSAMPLE = False # True for SRCNN or basleline test
 COARSE_RES = "9km"
 FINE_RES = "1km"
-SAVE_DIR = "checkpoints/central_valley"
+SAVE_DIR = "checkpoints"
 SMAP= True
 SCALE_FACTOR = 9
 BATCH_SIZE = 8
