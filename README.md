@@ -112,7 +112,7 @@ training/
 
 ### Qualitative Assessments
 
-![Results](images\fig_2.jpg)
+![Results](images/fig_2.jpg)
 
 ## Citation
 If you use this project in your research, please cite:
