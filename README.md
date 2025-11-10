@@ -23,53 +23,34 @@ To run the models and scripts in this repository, ensure your system meets the f
 
 The dataset would be made available on publishing of the study. You need to download the dataset to execute the training and test scripts.
 
----
-
-
-
 ### Folder Structure
 
 ```plaintext
 
 training/
-
+|
 ├── train/
-
 │   ├── 1km/
-
 │   │   └── SMAP-HB_1km_daily_mean_YYYYMMDD_X.tif
-
 │   ├── 3km/
-
 │   │   └── SMAP-HB_3km_daily_mean_YYYYMMDD_X.tif
-
 │   └── 9km/
-
 │       └── SMAP-E_9km_daily_mean_YYYYMMDD_X.tif
-
+|
 ├── test/
-
 │   ├── 1km/
-
 │   │   └── SMAP-HB_1km_daily_mean_YYYYMMDD_X.tif
-
 │   ├── 3km/
-
 │   │   └── SMAP-HB_3km_daily_mean_YYYYMMDD_X.tif
-
 │   └── 9km/
-
 │       └── SMAP-E_9km_daily_mean_YYYYMMDD_X.tif
-
+|
 └── SMAP-HB/
-
     ├── train/
-
     └── test/
+```
 
 ### Notes
-
-- **train/** and **test/** folders contain data for model training and evaluation, respectively.
 
 - **SMAP-HB:**
 
