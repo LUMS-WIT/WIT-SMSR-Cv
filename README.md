@@ -31,13 +31,17 @@ The dataset would be made available on publishing of the study. You need to down
     python main.py
     ```
 
-### 3. `Test`
+### `Test`
 
   - Command:
     ```python
     ```
 
-## Execution Workflow
+### `Inference`
+
+  - Command:
+    ```python
+    ```
 
 ## Results
 
@@ -59,7 +63,7 @@ The dataset would be made available on publishing of the study. You need to down
 
 ### Qualitative Assessments
 
-![Flow Graph](fig_2.png)
+![Results](images\fig_2.png)
 
 ## Citation
 If you use this project in your research, please cite:

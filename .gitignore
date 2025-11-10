@@ -1,0 +1,11 @@
+training
+*.zip
+__pycache__
+checkpoints
+temp*
+.Rproj.user
+.$*
+.RData
+.Rhistory
+*.txt
+*.Rproj
