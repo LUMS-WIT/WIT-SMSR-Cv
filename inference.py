@@ -1,4 +1,7 @@
-import os, torch, yaml
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+import torch, yaml
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from utils import SREncDataset, plot_predictions, plot_difference
