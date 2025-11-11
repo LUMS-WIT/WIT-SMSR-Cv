@@ -1,0 +1,25 @@
+# configs/config.yaml
+paths:
+  coarse_dir: "training/train/9km"
+  fine_dir: "training/train/1km"
+  save_dir: "checkpoints"
+  model_path: "checkpoints/best_model.pth"
+
+training:
+  epochs: 10
+  batch_size: 8           # 1 for test and inference
+  val_split: 0.2
+  lr: 1e-3
+
+data:
+  smap: true              # false for SMAP-HB
+  upsample: false         # true to SRCNN_Shuffle only
+  coarse_res: "9km"
+  fine_res: "1km"
+  scale_factor: 9
+
+model:
+  geomodel: true             # True only for GeoTransformerSR
+  arch: "GeoTransformerSR"   # GeoTransformerSR, Transformer, TransformerSkip, SRCNN_Shuffle
+
+device: "cuda"   # or "cpu"

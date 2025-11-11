@@ -1,175 +1,61 @@
-import os
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-
-import torch
-import numpy as np
+import os, torch, yaml, numpy as np
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+from utils import compare_images, mean_r, LossLogger, SREncDataset
 from model import SRCNN_Shuffle
 from transformer import Transformer, TransformerSkip, GeoTransformerSR
-from utils import compare_images, mean_r, LossLogger, SREncDataset
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
+def run(cfg, device):
+    dataset = SREncDataset(
+        coarse_dir=cfg["paths"]["coarse_dir"],
+        fine_dir=cfg["paths"]["fine_dir"],
+        coarse_res=cfg["data"]["coarse_res"],
+        fine_res=cfg["data"]["fine_res"],
+        scale_factor=cfg["data"]["scale_factor"],
+        SMAP=cfg["data"]["smap"],
+        upsample=cfg["data"]["upsample"]
+    )
+    loader = DataLoader(dataset, batch_size=cfg["training"]["batch_size"], shuffle=False)
 
-# === Configs ===
-COARSE_DIR = "training/SMAP-HB/test/9km"
-FINE_DIR = "training/SMAP-HB/test/1km"
-MODEL_PATH = "checkpoints/best_model.pth"
-BATCH_SIZE = 1
-SCALE_FACTOR = 9
-UPSAMPLE = False         # True for SRCNN or basleline test
-SMAP = True
-COARSE_RES = "9km"
-FINE_RES = "1km"
-# SAVE_DIR = "checkpoints"
+    geomodel = cfg["model"]["geomodel"]
+    arch = cfg["model"]["arch"]
+    scale_factor = cfg["data"]["scale_factor"]
 
-GEOMODEL = True
+    # === Model load ===
+    if arch == "GeoTransformerSR":
+        model = GeoTransformerSR(scale_factor=scale_factor).to(device)
+    elif arch == "TransformerSkip":
+        model = TransformerSkip(scale_factor=scale_factor).to(device)
+    elif arch == "Transformer":
+        model = Transformer(scale_factor=scale_factor).to(device)
+    else:
+        model = SRCNN_Shuffle(scale_factor=scale_factor).to(device)
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-
-def main(loader):
-
-
-    # === Load model ===
-    # model = SRCNN_Shuffle(scale_factor=SCALE_FACTOR).to(DEVICE)
-    # model = Transformer(scale_factor=SCALE_FACTOR).to(DEVICE)
-    # model = TransformerSkip(scale_factor=SCALE_FACTOR).to(DEVICE)
-    model = GeoTransformerSR(scale_factor=SCALE_FACTOR).to(DEVICE)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE,  weights_only=True))
+    model.load_state_dict(torch.load(cfg["paths"]["model_path"], map_location=device, weights_only=True))
     model.eval()
 
-    # === Evaluate ===
     all_metrics = {"PSNR": [], "MSE": [], "Bias": [], "ubRMSE": [], "PearsonR": []}
 
     with torch.no_grad():
         for batch_id, batch in enumerate(tqdm(loader, desc="Testing")):
-            # Unpack batch according to loader; always expects 6 fields!
-            # (coarse, fine, center_lon, center_lat, date_str, coarse_path)
-            coarse, fine, center_lon, center_lat, date_str, coarse_path = batch
-            
-            # Move tensors to device
-            coarse = coarse.to(DEVICE)
-            fine = fine.to(DEVICE)
-
-            # Predict
-            if GEOMODEL:
-                pred = model(coarse, center_lat, center_lon, date_str)
-            else:
-                pred = model(coarse)
-            
+            coarse, fine, center_lon, center_lat, date_str, *_ = batch
+            coarse, fine = coarse.to(device), fine.to(device)
+            pred = model(coarse, center_lat, center_lon, date_str) if geomodel else model(coarse)
             pred = pred.clamp(0.0, 1.0)
-
-            # Convert to numpy
-            pred_np = pred[0, 0].cpu().numpy()
-            fine_np = fine[0, 0].cpu().numpy()
-
-            # Clip and compute metrics
-            pred_np = np.clip(pred_np, 0, 1)
-            fine_np = np.clip(fine_np, 0, 1)
-
-            metrics = compare_images(pred_np, fine_np)
-
-            # print(f"[{batch_id}] PSNR: {metrics['PSNR']:.2f}, MSE: {metrics['MSE']:.4f}, "
-            #       f"Bias: {metrics['Bias']:.4f}, ubRMSE: {metrics['ubRMSE']:.4f}")
-
+            metrics = compare_images(pred[0,0].cpu().numpy(), fine[0,0].cpu().numpy())
             for k in all_metrics:
                 all_metrics[k].append(metrics[k])
 
-    # === Aggregate ===
     print("\nScores on Test Set:")
-    for k in all_metrics:
-        if k == "PearsonR":
-            mean_val = mean_r(all_metrics[k])
-        else:
-            mean_val = np.mean(all_metrics[k])
+    for k, vals in all_metrics.items():
+        mean_val = mean_r(vals) if k == "PearsonR" else np.mean(vals)
         print(f"{k}: {mean_val:.4f}")
-
-
-def baseline():
-    # === Load dataset ===
-    dataset = SREncDataset(
-        coarse_dir= COARSE_DIR,
-        fine_dir= FINE_DIR,
-        coarse_res=COARSE_RES,
-        fine_res= FINE_RES, 
-        scale_factor=SCALE_FACTOR,
-        SMAP=SMAP, 
-        upsample=True
-    )
-    loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False)
-
-    all_metrics = {"PSNR": [], "MSE": [], "Bias": [], "ubRMSE": [], "PearsonR": []}
-
-    for batch_id, batch in enumerate(tqdm(loader, desc="Testing")):
-        # Support both (coarse, fine) and (coarse, fine, ...)
-        if len(batch) == 2:
-            coarse, fine = batch
-        else:
-            coarse, fine, *_ = batch
-
-        coarse_np = coarse[0, 0].cpu().numpy()
-        fine_np = fine[0, 0].cpu().numpy()
-        coarse_np = np.clip(coarse_np, 0, 1)
-        fine_np = np.clip(fine_np, 0, 1)
-
-        metrics = compare_images(coarse_np, fine_np)
-        for k in all_metrics:
-            all_metrics[k].append(metrics[k])
-
-    # === Aggregate ===
-    print("\nBaseline on Test Set:")
-    for k in all_metrics:
-        if k == "PearsonR":
-            mean_val = mean_r(all_metrics[k])
-        else:
-            mean_val = np.mean(all_metrics[k])
-        print(f"{k}: {mean_val:.4f}")
-
-
-
-def logs_display():
-
-    logger = LossLogger("checkpoints/training_log.json")
-    logs = logger.get_logs()
-    epochs = range(1, len(logs["train_loss"]) + 1)
-
-    plt.figure()
-    plt.plot(epochs, logs["train_loss"], label="Train Loss")
-    plt.plot(epochs, logs["val_loss"], label="Val Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("MSE Loss")
-    plt.legend()
-    plt.title("Train/Val Loss")
-
-    plt.figure()
-    plt.plot(epochs, logs["train_psnr"], label="Train PSNR")
-    plt.plot(epochs, logs["val_psnr"], label="Val PSNR")
-    plt.xlabel("Epoch")
-    plt.ylabel("PSNR")
-    plt.legend()
-    plt.title("Train/Val PSNR") 
-    plt.show() 
 
 
 if __name__ == "__main__":
-    
-    # === Load dataset ===
-    dataset = SREncDataset(
-        coarse_dir=COARSE_DIR,
-        fine_dir=FINE_DIR,
-        coarse_res=COARSE_RES,
-        fine_res= FINE_RES, 
-        scale_factor=SCALE_FACTOR,
-        SMAP=SMAP,
-        upsample=UPSAMPLE
-    )
-    
-    loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False)
-
-    main(loader)
-    print('\n')
-    baseline()
-    # logs_display()
+    with open("configs/config.yaml", "r") as f:
+        cfg = yaml.safe_load(f)
+    device = torch.device(cfg["device"] if torch.cuda.is_available() else "cpu")
+    run(cfg, device)

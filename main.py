@@ -1,0 +1,49 @@
+import argparse
+import yaml
+import torch
+import train, test, inference
+
+
+def load_config(path="configs/config.yaml"):
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Super-resolution Experiment Runner")
+    parser.add_argument(
+        "--stage", "-s",
+        type=str,
+        required=True,
+        choices=["train", "test", "infer"],
+        help="Which stage to run: train | test | infer"
+    )
+    parser.add_argument(
+        "--config", "-c",
+        type=str,
+        default="configs/config.yaml",
+        help="Path to YAML configuration file"
+    )
+    args = parser.parse_args()
+
+    # === Load config and set device ===
+    cfg = load_config(args.config)
+    device = torch.device(cfg["device"] if torch.cuda.is_available() else "cpu")
+
+    print(f"Using device: {device}")
+    print(f"Config file: {args.config}")
+    print(f"Running stage: {args.stage}")
+
+    # === Dispatch to stage ===
+    if args.stage == "train":
+        train.run(cfg, device)
+    elif args.stage == "test":
+        test.run(cfg, device)
+    elif args.stage in ["infer"]:
+        inference.run(cfg, device)
+    else:
+        raise ValueError("Unknown stage argument!")
+
+
+if __name__ == "__main__":
+    main()
