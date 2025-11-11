@@ -71,27 +71,12 @@ training/
 - **File format:** `.tif` files are **GeoTIFF** raster data containing daily soil moisture values.
 
 
-### `Train`
+### `main.py`
 
   - Command:
     ```bash
-    python train.py
+     python main.py --stage=test  # Which stage to run: train | test | infer
     ```
-
-### `Test`
-
-  - Command:
-    ```bash
-    python test.py
-    ```
-
-### `Inference`
-
-  - Command:
-    ```bash
-    python inference.py
-    ```
-
 ## Results
 
 ### Quantitative Assessments  
