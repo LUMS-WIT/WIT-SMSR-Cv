@@ -68,7 +68,7 @@ training/
 
   - `{index}` → sub-RoI Id
 
-- **File format:** `.tif` files are **GeoTIFF** raster data containing daily soil moisture values.
+- **File format:** `.tif` files are **GeoTIFF** raster data containing daily surface soil moisture values.
 
 
 ### `main.py`
@@ -76,6 +76,7 @@ training/
   - Command:
     ```bash
      python main.py --stage=test  # Which stage to run: train | test | infer
+     python main.py -s test -c configs/config.yaml
     ```
 ## Results
 

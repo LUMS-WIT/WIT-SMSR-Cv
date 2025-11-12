@@ -411,3 +411,25 @@ class LossLogger:
     def get_logs(self):
         return self.logs
 
+def logs_display():
+
+    logger = LossLogger("checkpoints/training_log.json")
+    logs = logger.get_logs()
+    epochs = range(1, len(logs["train_loss"]) + 1)
+
+    plt.figure()
+    plt.plot(epochs, logs["train_loss"], label="Train Loss")
+    plt.plot(epochs, logs["val_loss"], label="Val Loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("MSE Loss")
+    plt.legend()
+    plt.title("Train/Val Loss")
+
+    plt.figure()
+    plt.plot(epochs, logs["train_psnr"], label="Train PSNR")
+    plt.plot(epochs, logs["val_psnr"], label="Val PSNR")
+    plt.xlabel("Epoch")
+    plt.ylabel("PSNR")
+    plt.legend()
+    plt.title("Train/Val PSNR") 
+    plt.show() 

@@ -107,10 +107,12 @@ def run(cfg, device):
     else:
         model = SRCNN_Shuffle(scale_factor=scale_factor).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=cfg["training"]["lr"])
-    logger = LossLogger(os.path.join(cfg["paths"]["save_dir"], "training_log.json"), overwrite=True)
-
+    optimizer = optim.Adam(model.parameters(), lr=float(cfg["training"]["lr"]))
     best_psnr, best_model_path = 10.0, os.path.join(cfg["paths"]["save_dir"], "best_model.pth")
+    
+    logging = cfg["training"]["log"]
+    if logging:
+        logger = LossLogger(os.path.join(cfg["paths"]["save_dir"], "training_log.json"), overwrite=True)
 
     for epoch in range(cfg["training"]["epochs"]):
         print(f"\nEpoch {epoch+1}/{cfg['training']['epochs']}")
@@ -121,7 +123,8 @@ def run(cfg, device):
         print(f"Train Loss: {train_loss:.4f} | Train PSNR: {train_psnr:.2f} | "
               f"Val Loss: {val_loss:.4f} | Val PSNR: {val_psnr:.2f}")
 
-        logger.log(train_loss, train_psnr, val_loss, val_psnr)
+        if logging:
+            logger.log(train_loss, train_psnr, val_loss, val_psnr)
 
         if val_psnr > best_psnr:
             best_psnr = val_psnr
